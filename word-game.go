@@ -5,11 +5,6 @@ type game struct {
 	numGuesses int
 }
 
-type answer struct {
-	correctLetters   int
-	correctPositions int
-}
-
 type ErrGuessLen string
 
 func (e ErrGuessLen) Error() string {
