@@ -5,6 +5,14 @@ type game struct {
 	numGuesses int
 }
 
+func NewGame(word string) *game {
+  // check word for repeated letters.
+  return &game{
+    word: word,
+    numGuesses: 0,
+  }
+}
+
 type ErrGuessLen string
 
 func (e ErrGuessLen) Error() string {
@@ -22,14 +30,9 @@ func checkGuess(word, guess string) (int, int, error) {
 		return 0, 0, ErrGuessLen(guess)
 	}
 
-	gl := make(map[rune]int, 4)
-
-	for i, l := range guess {
-		if _, ok := gl[l]; ok {
-			return 0, 0, ErrRepeatedLetter(guess)
-		} else {
-			gl[l] = i
-		}
+	gl, err := letterMap(guess)
+	if err != nil {
+	  return 0, 0, err
 	}
 
 	correctLetters, correctPositions := 0, 0
@@ -43,4 +46,16 @@ func checkGuess(word, guess string) (int, int, error) {
 	}
 
 	return correctLetters, correctPositions, nil
+}
+
+func letterMap(guess string) (map[rune]int, error) {
+  gl := make(map[rune]int, len(guess))
+  for i, l := range guess {
+		if _, ok := gl[l]; ok {
+			return nil, ErrRepeatedLetter(guess)
+		} else {
+			gl[l] = i
+		}
+	}
+	return gl, nil
 }
