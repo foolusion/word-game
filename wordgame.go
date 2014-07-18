@@ -1,5 +1,9 @@
 package wordgame
 
+import (
+	"fmt"
+)
+
 type gameState int
 
 const (
@@ -24,8 +28,34 @@ func NewGame(word string) (*Game, error) {
 	return &Game{
 		word:       word,
 		numGuesses: 0,
-		state:      NOT_STARTED,
+		state:      notStarted,
 	}, nil
+}
+
+// Main is the main game loop.
+func (g *Game) Main() {
+	for g.state != finished {
+		// handle input
+		var guess string
+		fmt.Scanln(&guess)
+		// perform game logic
+		cl, cp, err := checkGuess(g.word, guess)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			g.numGuesses++
+		}
+		if cp == len(g.word) {
+			g.state = finished
+		}
+		// render
+		if g.state == finished {
+			fmt.Println("You guessed it!")
+			return
+		}
+		fmt.Println(cl, cp)
+		fmt.Println("Guess again.")
+	}
 }
 
 // ErrGuessLen occurs when the length of a guess does not match the length of the game word.
