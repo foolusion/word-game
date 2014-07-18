@@ -1,24 +1,41 @@
 package wordgame
 
-type game struct {
+type gameState int
+
+const (
+	notStarted gameState = iota
+	started
+	finished
+)
+
+// Game is the main data structure for games.
+type Game struct {
 	word       string
 	numGuesses int
+	state      gameState
 }
 
-func NewGame(word string) *game {
-  // check word for repeated letters.
-  return &game{
-    word: word,
-    numGuesses: 0,
-  }
+// NewGame creates a new game or returns an error if the word is illegal.
+func NewGame(word string) (*Game, error) {
+	_, err := letterMap(word)
+	if err != nil {
+		return nil, err
+	}
+	return &Game{
+		word:       word,
+		numGuesses: 0,
+		state:      NOT_STARTED,
+	}, nil
 }
 
+// ErrGuessLen occurs when the length of a guess does not match the length of the game word.
 type ErrGuessLen string
 
 func (e ErrGuessLen) Error() string {
 	return "ErrGuessLen: " + string(e) + " must be the same length as the answer."
 }
 
+// ErrRepeatedLetter occurs when the game word or guess has repeated letters.
 type ErrRepeatedLetter string
 
 func (e ErrRepeatedLetter) Error() string {
@@ -32,7 +49,7 @@ func checkGuess(word, guess string) (int, int, error) {
 
 	gl, err := letterMap(guess)
 	if err != nil {
-	  return 0, 0, err
+		return 0, 0, err
 	}
 
 	correctLetters, correctPositions := 0, 0
@@ -49,13 +66,12 @@ func checkGuess(word, guess string) (int, int, error) {
 }
 
 func letterMap(guess string) (map[rune]int, error) {
-  gl := make(map[rune]int, len(guess))
-  for i, l := range guess {
+	gl := make(map[rune]int, len(guess))
+	for i, l := range guess {
 		if _, ok := gl[l]; ok {
 			return nil, ErrRepeatedLetter(guess)
-		} else {
-			gl[l] = i
 		}
+		gl[l] = i
 	}
 	return gl, nil
 }
