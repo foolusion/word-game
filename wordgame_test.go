@@ -28,3 +28,36 @@ func TestCheckGuess(t *testing.T) {
 		}
 	}
 }
+
+var newGameTests = []struct {
+	word   string
+	eGame  *Game
+	eError error
+}{
+	{"bird", &Game{word: "bird", numGuesses: 0, state: notStarted}, nil},
+	{"aa", nil, ErrRepeatedLetter("aa")},
+	{"Fart", &Game{word: "Fart", numGuesses: 0, state: notStarted}, nil},
+	{"abcd", &Game{word: "abcd", numGuesses: 0, state: notStarted}, nil},
+}
+
+func TestNewGame(t *testing.T) {
+	for _, tt := range newGameTests {
+		aGame, aError := NewGame(tt.word)
+		if (aGame == nil && tt.eGame != nil) || (aGame != nil && tt.eGame == nil) {
+			t.Errorf("NewGame(%v): expected %+v %v, actual %+v %v", tt.word, tt.eGame, tt.eError, aGame, aError)
+			continue
+		}
+		// check if actual and expected are nil and errors are not the same.
+		if aGame == nil && tt.eGame == nil && aError != tt.eError {
+			t.Errorf("NewGame(%v): expected %+v %v, actual %+v %v", tt.word, tt.eGame, tt.eError, aGame, aError)
+			continue
+		} else if aGame == nil && tt.eGame == nil {
+			// if both are nil and error is same skip checking values
+			continue
+		}
+		// check if the values are the same
+		if aGame.word != tt.eGame.word || aGame.numGuesses != tt.eGame.numGuesses || aGame.state != tt.eGame.state {
+			t.Errorf("NewGame(%v): expected %+v %v, actual %+v %v", tt.word, tt.eGame, tt.eError, aGame, aError)
+		}
+	}
+}
